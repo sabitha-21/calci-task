@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+        .calculator-container {
+            text-align: center;
+            background-color: #f3f4f6;
+            padding: 20px;
+            display: inline-block;
+        }
+        .calculator {
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px #000;
+            background-color: #93e2ec;
+            padding: 20px;
+            width: 300px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 5px;
+            justify-items: center;
+        }
+        .calculator h2 {
+            grid-column: span 4;
+            margin-bottom: 10px;
+        }
+        .calculator-screen {
+            grid-column: span 4;
+            height: 50px;
+            border: none;
+            background-color: #fff;
+            color: #333;
+            font-size: 1.5em;
+            text-align: right;
+            padding-right: 10px;
+            padding-left: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            height: 50px;
+            width: 100%; /* Each button takes up full width */
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background-color:white;
+            color: #333;
+            cursor: pointer;
+        }
+        .operator {
+            background-color:white;
+            color:black;
+        }
+        .all-clear {
+            background-color: #f44336;
+            color: #fff;
+            grid-column: span 3; /* Span 3 columns */
+        }
+        .equal-sign {
+            background-color:white;
+            color:black;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator">
+            <h2 style="color: white;">Calculator</h2>
+            <input type="text" class="calculator-screen" id="screen" value="0" disabled />
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">+</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">-</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">x</button>
+            <button>/</button>
+            <button>0</button>
+            <button>.</button>
+            <button class="equal-sign">=</button>
+            <button class="all-clear">C</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calculator = document.querySelector('.calculator');
+            const screen = document.getElementById('screen');
+            let firstOperand = null;
+            let operator = null;
+            let waitingForSecondOperand = false;
+
+            calculator.addEventListener('click', function (event) {
+                const target = event.target;
+
+                if (!target.matches('button')) {
+                    return;
+                }
+
+                if (target.classList.contains('operator')) {
+                    handleOperator(target.textContent);
+                    updateDisplay();
+                    return;
+                }
+
+                if (target.classList.contains('all-clear')) {
+                    clearCalculator();
+                    updateDisplay();
+                    return;
+                }
+
+                if (target.classList.contains('equal-sign')) {
+                    calculate();
+                    updateDisplay();
+                    return;
+                }
+
+                inputDigit(target.textContent);
+                updateDisplay();
+            });
+
+            function inputDigit(digit) {
+                if (waitingForSecondOperand) {
+                    screen.value = digit;
+                    waitingForSecondOperand = false;
+                } else {
+                    screen.value = screen.value === '0' ? digit : screen.value + digit;
+                }
+            }
+
+            function handleOperator(nextOperator) {
+                const inputValue = parseFloat(screen.value);
+
+                if (operator && waitingForSecondOperand) {
+                    operator = nextOperator;
+                    return;
+                }
+
+                if (firstOperand === null) {
+                    firstOperand = inputValue;
+                } else if (operator) {
+                    const result = calculate(firstOperand, inputValue, operator);
+                    screen.value = `${parseFloat(result.toFixed(7))}`;
+                    firstOperand = result;
+                }
+
+                waitingForSecondOperand = true;
+                operator = nextOperator;
+            }
+
+            function calculate(firstOperand, secondOperand, operator) {
+                switch (operator) {
+                    case '+':
+                        return firstOperand + secondOperand;
+                    case '-':
+                        return firstOperand - secondOperand;
+                    case 'x':
+                        return firstOperand * secondOperand;
+                    case '/':
+                        return firstOperand / secondOperand;
+                    default:
+                        return secondOperand;
+                }
+            }
+
+            function clearCalculator() {
+                screen.value = '0';
+                firstOperand = null;
+                operator = null;
+                waitingForSecondOperand = false;
+            }
+
+            function updateDisplay() {
+                screen.focus();
+            }
+        });
+    </script>
+</body>
+</html>
